@@ -35,10 +35,12 @@ def clean_data(data: pd.DataFrame):
     # Correctiong for ee_r250 country mapping
     file_path = "ee_r250_correspondence.gpkg"
     gdf = gpd.read_file(file_path)
-    # Merge on country code from df_gep and adm0_a3 from geopackage
-    df_merged = pd.merge(data, gdf, how='inner', left_on='admin', right_on='brk_name')
+    # Merge on country code from df_gep and brk_name from geopackage
+    data = pd.merge(gdf, data,  how='left', left_on='brk_name', right_on='admin')
     # Remain TCUV
     data = data.rename(columns={"TCUV": "gep_subistence_fish"})
+    # Keep only relevant columns
+    data = data[['ee_r264_id', 'iso3_r250_id', 'iso3_r250_label', 'ee_r264_description', 'gep_subistence_fish']]
     # Return clean data
     return data
 
