@@ -4,9 +4,12 @@ The paper can be found at: https://hull-repository.worktribe.com/preview/4748071
 The data can be found at: https://www.sciencebase.gov/catalog/item/644ae0e0d34e45f6ddccf773
 What we want at the end is a TCUV for each country. This is a cross-section of national value. 
 """
-# Depenendencies
+# Dependencies
 import os
 import pandas as pd
+import geopandas as gpd
+import numpy as np  
+
 
 # Loads in the data
 def load_data(path: str):
@@ -29,6 +32,13 @@ def clean_data(data: pd.DataFrame):
     data = data[["admin", "TCUV"]]
     # Collapse data to keep only the first TCUV for each admin
     data = data.drop_duplicates(subset=["admin"], keep="first")
+    # Correctiong for ee_r250 country mapping
+    file_path = "ee_r250_correspondence.gpkg"
+    gdf = gpd.read_file(file_path)
+    # Merge on country code from df_gep and adm0_a3 from geopackage
+    df_merged = pd.merge(data, gdf, how='inner', left_on='admin', right_on='brk_name')
+    # Remain TCUV
+    data = data.rename(columns={"TCUV": "gep_subistence_fish"})
     # Return clean data
     return data
 
